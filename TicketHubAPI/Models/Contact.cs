@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
 
 namespace TicketHubAPI.Models
 {
@@ -42,26 +41,21 @@ namespace TicketHubAPI.Models
         [Key]
         public int ContactId { get; set; }
 
-        [Required(ErrorMessage = "Concert ID is required.")]
         public int ConcertId { get; set; }
 
         [EmailAddress]
         public required string Email { get; set; }
 
-        [PersonalData]
         public required string Phone { get; set; }
 
         [CreditCard]
-        [PersonalData]
         [Required]
         public required string CreditCard { get; set; }
 
         [Required]
-        [PersonalData]
         public required string Expiration { get; set; }
 
         [Required]
-        [PersonalData]
         public required string SecurityCode { get; set; }
 
         public int Quantity { get; set; } = 0;
