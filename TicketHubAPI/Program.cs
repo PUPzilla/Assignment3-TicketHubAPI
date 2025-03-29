@@ -6,7 +6,6 @@ builder.Services.AddDbContext<TicketHubAPIContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TicketHubAPIContext") ?? throw new InvalidOperationException("Connection string 'TicketHubAPIContext' not found.")));
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

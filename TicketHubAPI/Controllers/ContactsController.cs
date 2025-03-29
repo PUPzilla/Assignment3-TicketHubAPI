@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Azure.Storage.Queues;
 using TicketHubAPI.Data;
 using TicketHubAPI.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace TicketHubAPI.Controllers
 {
@@ -47,7 +48,7 @@ namespace TicketHubAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutContact(int id, Contact contact)
         {
-            if (id != contact.ContactId)
+            if (id != contact.ConcertId)
             {
                 return BadRequest();
             }
@@ -78,23 +79,33 @@ namespace TicketHubAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Contact>> PostContact(Contact contact)
         {
-            string queueName = "contacts-queue";
-            
-            string? connectionString =
-                _configuration["AzureStorageConnectionString"];
-
-            if (string.IsNullOrEmpty(connectionString))
+            if (ModelState.IsValid)
             {
-                return BadRequest("An error was encountered");
+                string queueName = "contacts-queue";
+
+                string? connectionString = _configuration["AzureStorageConnectionString"];
+
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    return BadRequest(new { message = "Error: No connection string was provided." });
+                }
+
+                try
+                {
+                    QueueClient queueClient = new QueueClient(connectionString, queueName);
+
+                    string message = JsonSerializer.Serialize(contact);
+                    await queueClient.SendMessageAsync(message);
+
+                    return Ok(new { message = $"Contact information was sent successfully.\nHello {contact.FullName}!" });
+                }
+                catch (Exception e)
+                {
+                    return StatusCode(500, new { message = "An error was encountered while sending contact info to queue.", error = e.Message });
+                }
             }
 
-            QueueClient queueClient = new QueueClient(connectionString, queueName);
-
-            string message = JsonSerializer.Serialize(contact);
-
-            await queueClient.SendMessageAsync(message);
-
-            return Ok("Hello " + contact.FirstName + "!");
+            return BadRequest(new { message = "Error: A required field was missing." });
         }
 
         // DELETE: api/Contacts/5
@@ -115,7 +126,7 @@ namespace TicketHubAPI.Controllers
 
         private bool ContactExists(int id)
         {
-            return _context.Contact.Any(e => e.ContactId == id);
+            return _context.Contact.Any(e => e.ConcertId == id);
         }
     }
 }
