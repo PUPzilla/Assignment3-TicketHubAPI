@@ -14,6 +14,6 @@ namespace TicketHubAPI.Data
         {
         }
 
-        public DbSet<TicketHubAPI.Models.Contact> Contact { get; set; } = default!;
+        public DbSet<TicketHubAPI.Models.TicketPurchase> TicketPurchases { get; set; } = default!;
     }
 }

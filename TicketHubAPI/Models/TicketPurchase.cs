@@ -2,9 +2,9 @@
 
 namespace TicketHubAPI.Models
 {
-    public class Contact
+    public class TicketPurchase
     {
-        [Required]
+        [Key]
         public int ConcertId { get; set; }
 
         [Required(ErrorMessage = "An email address is required."), EmailAddress]
