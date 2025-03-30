@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Queues;
-using TicketHubAPI.Data;
 using TicketHubAPI.Models;
 using Azure.Storage.Queues.Models;
 
@@ -13,22 +12,19 @@ namespace TicketHubAPI.Controllers
     {
         private readonly IConfiguration _configuration;
 
-        private readonly TicketHubAPIContext _context;
-
-        public TicketPurchaseController(TicketHubAPIContext context, IConfiguration configuration)
+        public TicketPurchaseController(IConfiguration configuration)
         {
-            _context = context;
             _configuration = configuration;
         }
 
         // GET: api/TicketPurchaces
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TicketPurchase>>> GetTicketPurchace()
+        public async Task<ActionResult<IEnumerable<TicketPurchase>>> GetTicketPurchaces()
         {
-            string queueName = "tickethub";
+            string? queueName = _configuration["QueueName"];
             string? connectionString = _configuration["AzureStorageConnectionString"];
 
-            if (string.IsNullOrEmpty(_configuration["AzureStorageConnectionString"]))
+            if (string.IsNullOrEmpty(connectionString))
             {
                 return BadRequest(new { message = "Error: No connection string was provided." });
             }
@@ -56,12 +52,6 @@ namespace TicketHubAPI.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<ActionResult<TicketPurchase>> GetAllConcertTickets()
-        {
-
-        }
-
         // POST: api/TicketPurchaces
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -69,13 +59,17 @@ namespace TicketHubAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                string queueName = "tickethub";
-
+                string? queueName = _configuration["QueueName"];
                 string? connectionString = _configuration["AzureStorageConnectionString"];
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     return BadRequest(new { message = "Error: No connection string was provided." });
+                }
+
+                if(!IsValidExpiration(ticketPurchase.Expiration))
+                {
+                    return BadRequest("Card has expired, or expiration date was not formatted correctly ('MM/YY').");
                 }
 
                 try
@@ -92,29 +86,17 @@ namespace TicketHubAPI.Controllers
                     return StatusCode(500, new { message = "An error was encountered while sending info to queue.", error = e.Message });
                 }
             }
-
-            return BadRequest(new { message = "Error: A required field was missing." });
+            return BadRequest("Error: A required field was missing.");
         }
 
-        // DELETE: api/TicketPurchaces/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTicketPurchace(int id)
+        // Checking credit card expiration date vs current date
+        private bool IsValidExpiration(string expiration)
         {
-            var ticketPurchase = await _context.TicketPurchases.FindAsync(id);
-            if (ticketPurchase== null)
+            if(DateTime.TryParseExact(expiration, "MM/yy", null, System.Globalization.DateTimeStyles.None, out DateTime expDate))
             {
-                return NotFound();
+                return expDate > DateTime.UtcNow;
             }
-
-            _context.TicketPurchases.Remove(ticketPurchase);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }        
-
-        private bool TicketPurchaceExists(int id)
-        {
-            return _context.TicketPurchases.Any(e => e.ConcertId == id);
+            return false;
         }
     }
 }
