@@ -42,7 +42,7 @@ namespace TicketHubAPI.Controllers
 
                 var message = retrievedMessages[0];
 
-                await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                //await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
 
                 return Ok(new { Message = message });
             }
