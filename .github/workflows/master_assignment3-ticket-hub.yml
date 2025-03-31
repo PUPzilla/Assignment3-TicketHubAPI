@@ -54,5 +54,5 @@ jobs:
         with:
           app-name: 'Assignment3-Ticket-Hub'
           slot-name: 'Production'
-          path: ${{ github.workspace }}/publish
+          package: ${{ github.workspace }}/publish
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BEC2B75E1F9E4C6688A7D20B5B63829D }}
