@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP.Net Core app to Azure Web App - Assignment3-Ticket-Hub
 
 on:
@@ -29,6 +26,9 @@ jobs:
       - name: dotnet publish
         run: dotnet publish TicketHubAPI/TicketHubAPI.csproj -c Release -o ${{ github.workspace }}/publish
 
+      - name: List files in publish directory
+        run: dir ${{ github.workspace }}/publish  # List the files to verify the output directory
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -54,5 +54,5 @@ jobs:
         with:
           app-name: 'Assignment3-Ticket-Hub'
           slot-name: 'Production'
-          package: ${{ github.workspace }}/publish
+          package: ${{ github.workspace }}/publish  # The publish directory
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BEC2B75E1F9E4C6688A7D20B5B63829D }}
