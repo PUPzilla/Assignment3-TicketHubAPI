@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Azure.Storage.Queues;
 using TicketHubAPI.Models;
 using Azure.Storage.Queues.Models;
+using System.Text;
 
 namespace TicketHubAPI.Controllers
 {
@@ -79,7 +80,10 @@ namespace TicketHubAPI.Controllers
                     string message = JsonSerializer.Serialize(ticketPurchase);
                     await queueClient.SendMessageAsync(message);
 
-                    return Ok(new { message = $"TicketPurchace information was sent successfully.\nHello {ticketPurchase.FullName}!" });
+                    var plainTextBytes = Encoding.UTF8.GetBytes(message);
+                    await queueClient.SendMessageAsync(Convert.ToBase64String(plainTextBytes));
+
+                    return Ok("Hello " + ticketPurchase.FirstName + ". Purchase info sent to queue.");
                 }
                 catch (Exception e)
                 {
