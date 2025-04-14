@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket Purchase</title>
+    <style>
+        body { font-family: sans-serif; }
+        form { display: flex; flex-direction: column; width: 300px; margin: 20px auto; }
+        input, button { margin-bottom: 10px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Purchase Tickets</h1>
+    <form id="ticketForm">
+        <input type="text" id="concertName" placeholder="Concert Name" required>
+        <input type="text" id="customerName" placeholder="Customer Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="number" id="numberOfTickets" placeholder="Number of Tickets" required>
+        <button type="submit">Purchase</button>
+    </form>
+
+    <script>
+        document.getElementById('ticketForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = {
+                ConcertName: document.getElementById('concertName').value,
+                CustomerName: document.getElementById('customerName').value,
+                Email: document.getElementById('email').value,
+                NumberOfTickets: parseInt(document.getElementById('numberOfTickets').value)
+            };
+
+            fetch('https://assignment3-ticket-hub-eue7dfdgggbneqa2.canadacentral-01.azurewebsites.net/api/TicketPurchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Purchase successful!');
+                } else {
+                    alert('Purchase failed.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            });
+        });
+    </script>
+</body>
+</html>
